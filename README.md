@@ -31,24 +31,7 @@ The key points:
 
 - Closing times are based on speeds in this table, using the speed for the next control's distance:
 
-| Distance | Minimum Speed |
-|----------|---------------|
-| 200KM    | 15km/hr       |   
-| 400KM    | 15km/hr       |
-| 600KM    | 15km/hr       |
-| 1000KM   | 11.428km/hr   |
-
 - The final closing time is 13.5 hours after the start for a 200KM brevet.
-
-- No controle can exceed the max distance or min speed according to this table:
-
-| Distance | Max Distance | Min Speed |
-|----------|--------------|-----------|
-| 200KM    | 20%          | 15km/hr   |
-| 300KM    | 20%          | 15km/hr   |   
-| 400KM    | 20%          | 15km/hr   |
-| 600KM    | 25%          | 15km/hr   |
-| 1000KM   | 25%          | 11.428km/hr |
 
 The app implements these rules to dynamically calculate open and close times as the brevet distance, start time, and controle locations are adjusted.
 
