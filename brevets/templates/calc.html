@@ -188,85 +188,102 @@
                     });
                   });
 
+            // This function is executed when the DOM is fully loaded
             $(document).ready(function(){
-               
-                    $('#insert').click(function(event) {
-                     event.preventDefault();
+            
+               // Event handler for changes in the 'miles' input field
+               $('input[name="miles"]').change(function() {
+                     var miles = parseFloat($(this).val());
+                     var km = (1.609344 * miles).toFixed(6);
+                     console.log("Converted " + miles + " miles to " + km + " kilometers");
+                     var control_entry = $(this).parents(".control");
+                     var target = control_entry.find("input[name='km']");
+                     target.val( km );
+                     // Then calculate times for this entry
+                     calc_times(control_entry);
+               });
 
-                     var distance = $("#brevet_dist_km").val();
-                     var begin_date = $("#begin_date").val(); 
-                     var form_controls = [];
+            // Event handler for changes in the 'km' input field
+            $('input[name="km"]').change(function() {
+                  var km = parseFloat($(this).val());
+                  var miles = (0.621371 * km).toFixed(6);
+                  console.log("Converted " + km + " km to " + miles + " miles");
+                  var control_entry = $(this).parents(".control");
+                  var target = control_entry.find("input[name='miles']");
+                  target.val( miles );
+                  // Then calculate times for this entry
+                  calc_times(control_entry);
+            });
+            });
 
-                     $('.control').each(function () {
-                        var control_data = $(this);
-                        //console.log("control_data = ", control_data);
-                        var km = control_data.find("input[name='km']").val();
-                        var open = control_data.find("input[name='open']").val();
-                        //console.log("open = ", open);
-                        var close = control_data.find("input[name='close']").val();
-                        //console.log("close= %s", close);
+            $(document).ready(function(){
+            // Event handler for the 'insert' button
+            $('#insert').click(function(event) {
+                  event.preventDefault();
 
-                        /*// Clear existing values
-                        control_data.find("input[name='km']").val('');
-                        control_data.find("input[name='open']").val('');
-                        control_data.find("input[name='close']").val('');
-                        control_data.find("input[name='miles']").val('');*/
+                  var distance = $("#brevet_dist_km").val();
+                  var begin_date = $("#begin_date").val(); 
+                  var form_controls = [];
 
-                        var data_json = {
-                           "km": km,
-                           "open": open,
-                           "close": close
-                        };
+                  // Iterate through each control entry
+                  $('.control').each(function () {
+                     var control_data = $(this);
+                     var km = control_data.find("input[name='km']").val();
+                     var open = control_data.find("input[name='open']").val();
+                     var close = control_data.find("input[name='close']").val();
 
-                        form_controls.push(data_json);
-                     
-                     });
-
-                     var controls_list = {
-                        "distance": distance, 
-                        "begin_date": begin_date,
-                        "controls": form_controls
+                     var data_json = {
+                        "km": km,
+                        "open": open,
+                        "close": close
                      };
-                     console.log("distance = %s",distance);
-                     console.log("begin_date = %s",begin_date);
-                     console.log("controls = %",form_controls);
-                     $.ajax({
-                        dataType: 'json',
-                        contentType: "application/json",
-                        type: 'POST',
-                        url: SAVE_URL,
-                        data: JSON.stringify(controls_list),
-                        success: function(data) {
-                           if (data.status == 1) {
-                           console.log("Successfully inserted! Response: ", data);
-                           }
-                           else {
-                           console.log("Insertion failed: ", data);
-                           }
-                        },
-                        error: function(err){
-                           console.log("Error: ", err); 
-                        }
-                     });
+
+                     form_controls.push(data_json);
                   });
 
+                  // Prepare the data for AJAX request
+                  var controls_list = {
+                     "distance": distance, 
+                     "begin_date": begin_date,
+                     "controls": form_controls
+                  };
 
-               
-               $('#fetch').click(function(event) {
+                  // Send a POST request to the server
+                  $.ajax({
+                     dataType: 'json',
+                     contentType: "application/json",
+                     type: 'POST',
+                     url: SAVE_URL,
+                     data: JSON.stringify(controls_list),
+                     success: function(data) {
+                        if (data.status == 1) {
+                              console.log("Successfully inserted! Response: ", data);
+                        } else {
+                              console.log("Insertion failed: ", data);
+                        }
+                     },
+                     error: function(err){
+                        console.log("Error: ", err); 
+                     }
+                  });
+            });
+
+            // Event handler for the 'fetch' button
+            $('#fetch').click(function(event) {
                   event.preventDefault();
-               
+
                   // Using getJSON to send a GET request to the server
                   $.getJSON(GET_URL).done(function (data) {
                      console.log(data);
                      if (data.status == 1) {
-                           console.log("Successfully fetched: ", data);
-                           var distance = $("select[name='distance']").val(data.result.distance);
-                           var begin_date = $("input[name='begin_date']").val(data.result.begin_date);
-                           var form_controls = data.result.controls || [];
-                           var num_controls = form_controls.length;
+                        console.log("Successfully fetched: ", data);
+                        var distance = $("select[name='distance']").val(data.result.distance);
+                        var begin_date = $("input[name='begin_date']").val(data.result.begin_date);
+                        var form_controls = data.result.controls || [];
+                        var num_controls = form_controls.length;
 
-                           // Populate each row in the HTML table with the fetched data
-                           $('.control').each(function (index) {
+                        // Populate each row in the HTML table with the fetched data
+                        $('.control').each(function (index) {
                               var row_item = $(this); // This is our row
 
                               // Clear existing values
@@ -280,15 +297,15 @@
                                  row_item.find("input[name='open']").val(form_controls[index].open);
                                  row_item.find("input[name='close']").val(form_controls[index].close);
                               }
-                           });
+                        });
                      } else {
-                           console.log("Fetch failed: ", data);
+                        console.log("Fetch failed: ", data);
                      }
                   }).fail(function (err) {
                      // In case you get an error...
                      console.log("Error: ", err);
                   });
-               });
+            });
             });
          </script>
       </div>

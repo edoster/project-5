@@ -94,15 +94,23 @@ def _calc_times():
 
 def get_times():
     """
-    Obtains the newest document in the "lists" collection in database "brevets".
+    Obtains the newest document in the "lists" collection in the database "brevets".
 
     Returns title (string) and items (list of dictionaries) as a tuple.
     """
 
+    # Retrieve the latest document from the "times" collection
     form_data = times.find().sort("_id", -1).limit(1)
-    form_data_list = list(form_data)  # Convert Cursor to list
-    app.logger.debug("form_data: %s", form_data_list)  # Print the list
+    
+    # Convert the Cursor to a list
+    form_data_list = list(form_data)  
+    
+    # Log the retrieved list
+    app.logger.debug("form_data: %s", form_data_list)  
+
+    # Iterate through the list of documents
     for data in form_data_list:
+        # Check if the required keys are present in the document
         if all(key in data for key in ["distance", "begin_date", "controls"]):
             return data["distance"], data["begin_date"], data["controls"]
         else:
@@ -112,28 +120,27 @@ def get_times():
 @app.route('/insert', methods=['POST'])
 def insert():
     try:
-        # Use request.form for form data
-        #distance = request.form.get("distance")
-        #app.logger.debug("distance = %s", distance)
-        #begin_date = request.form.get("begin_date")
-        #app.logger.debug("begin_date = %s", begin_date)
-        #controls = request.form.get("controls")
-        #app.logger.debug("controls = %s", controls)
-
+        # Parse the JSON data from the request
         input_json = request.json
 
-        distance = request.json["distance"]
-        begin_date = request.json["begin_date"]
-        controls = request.json["controls"]
+        # Extract data from the JSON
+        distance = input_json["distance"]
+        begin_date = input_json["begin_date"]
+        controls = input_json["controls"]
 
+        # Insert data into the database
         time_id = insert_times(distance, begin_date, controls)
         app.logger.debug("time_id = %s", time_id)
+
+        # Respond with a JSON message indicating success
         return flask.jsonify(result={},
                              message="Inserted!",
                              status=1,
                              mongo_id=time_id)
     except Exception as e:
         app.logger.debug("Oh no! Server error! Exception: %s", str(e))
+
+        # Respond with a JSON message indicating failure
         return flask.jsonify(result={},
                              message="Oh no! Server error!",
                              status=0,
@@ -148,14 +155,21 @@ def insert_times(distance, begin_date, controls):
 
     Returns the unique ID assigned to the document by mongo (primary key.)
     """
+    
+    # Insert data into the "times" collection
     output = times.insert_one({
         "distance": distance,
         "begin_date": begin_date,
         "controls": controls})
+    
+    # Log the output
     app.logger.debug("output = ", output)
-    _id = output.inserted_id
-    return str(_id)
 
+    # Get the unique ID assigned to the inserted document
+    _id = output.inserted_id
+    
+    # Return the ID as a string
+    return str(_id)
 
 
 @app.route("/fetch")
@@ -168,27 +182,40 @@ def fetch():
     JSON interface: gets JSON, responds with JSON
     """
     try:
-        distance, begin_date, controls = get_times()  # This line should come first
+        # Get the latest data from the database
+        distance, begin_date, controls = get_times()  
+
+        # Check if any of the required data is missing
         if distance is None or begin_date is None or controls is None:
             app.logger.debug("get_times returned None")
+
+            # Respond with a JSON message indicating failure
             return flask.jsonify(
                 result={}, 
                 status=0,
                 message="Failed to fetch data!")
+        
         app.logger.debug("fetched!")
-        app.logger.debug("distance = %s", distance)  # Now 'distance' is defined
+
+        # Log the fetched data
+        app.logger.debug("distance = %s", distance)  
         app.logger.debug("begin_date = %s", begin_date)
         app.logger.debug("controls = %s", controls)
+
+        # Respond with a JSON message indicating success
         return flask.jsonify(
                 result={"distance": distance, "begin_date": begin_date, "controls": controls}, 
                 status=1,
                 message="Successfully fetched all data!")
     except Exception as e:
         app.logger.debug("Exception occurred: %s", str(e))
+
+        # Respond with a JSON message indicating failure
         return flask.jsonify(
                 result={}, 
                 status=0,
                 message="Something went wrong, couldn't fetch any times/distances!")
+
     
 
 #############
@@ -198,4 +225,5 @@ if app.debug:
     app.logger.setLevel(logging.DEBUG)
 
 if __name__ == "__main__":
+    #print("Opening for global access on port {}".format(CONFIG.PORT))
     app.run(host="0.0.0.0", port=5000)
