@@ -239,11 +239,6 @@
                         success: function(data) {
                            if (data.status == 1) {
                            console.log("Successfully inserted! Response: ", data);
-                           $('form')[0].reset();
-                           $("input[name='km']").val('');
-                           $("input[name='open']").val('');
-                           $("input[name='close']").val('');
-                           $("input[name='miles']").val('');
                            }
                            else {
                            console.log("Insertion failed: ", data);
@@ -263,13 +258,11 @@
                   // Using getJSON to send a GET request to the server
                   $.getJSON(GET_URL).done(function (data) {
                      console.log(data);
-                     
-
                      if (data.status == 1) {
                            console.log("Successfully fetched: ", data);
                            var distance = $("select[name='distance']").val(data.result.distance);
                            var begin_date = $("input[name='begin_date']").val(data.result.begin_date);
-                           var form_controls = data.result.form_controls || [];
+                           var form_controls = data.result.controls || [];
                            var num_controls = form_controls.length;
 
                            // Populate each row in the HTML table with the fetched data

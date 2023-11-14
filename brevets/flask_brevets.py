@@ -33,7 +33,7 @@ app.logger.setLevel(logging.DEBUG)
 db = client.brevets
 
 # Use collection of "times" in the database
-times = db.form_controls
+times = db.lists
 
 ###
 # Pages
@@ -100,21 +100,31 @@ def get_times():
     """
 
     form_data = times.find().sort("_id", -1).limit(1)
-
-    for data in form_data:
-        return data["distance"], data["begin_date"], data["controls"]
+    form_data_list = list(form_data)  # Convert Cursor to list
+    app.logger.debug("form_data: %s", form_data_list)  # Print the list
+    for data in form_data_list:
+        if all(key in data for key in ["distance", "begin_date", "controls"]):
+            return data["distance"], data["begin_date"], data["controls"]
+        else:
+            app.logger.debug("Missing key in data: %s", data)
     
 
 @app.route('/insert', methods=['POST'])
 def insert():
     try:
         # Use request.form for form data
-        distance = request.form.get("distance")
-        app.logger.debug("distance = %s", distance)
-        begin_date = request.form.get("begin_date")
-        app.logger.debug("begin_date = %s", begin_date)
-        controls = request.form.get("controls")
-        app.logger.debug("controls = %s", controls)
+        #distance = request.form.get("distance")
+        #app.logger.debug("distance = %s", distance)
+        #begin_date = request.form.get("begin_date")
+        #app.logger.debug("begin_date = %s", begin_date)
+        #controls = request.form.get("controls")
+        #app.logger.debug("controls = %s", controls)
+
+        input_json = request.json
+
+        distance = request.json["distance"]
+        begin_date = request.json["begin_date"]
+        controls = request.json["controls"]
 
         time_id = insert_times(distance, begin_date, controls)
         app.logger.debug("time_id = %s", time_id)
@@ -129,7 +139,7 @@ def insert():
                              status=0,
                              mongo_id='None')
     
-    
+
 def insert_times(distance, begin_date, controls):
     """
     Inserts brevet distance, control distance(s), open times, and close times into the database "brevetsdb", under the collection "times".
@@ -158,14 +168,23 @@ def fetch():
     JSON interface: gets JSON, responds with JSON
     """
     try:
-        distance, begin_date, controls = get_times()
-        app.logger.debug("get_times() = %s, %s, %s", distance, begin_date, controls)
+        distance, begin_date, controls = get_times()  # This line should come first
+        if distance is None or begin_date is None or controls is None:
+            app.logger.debug("get_times returned None")
+            return flask.jsonify(
+                result={}, 
+                status=0,
+                message="Failed to fetch data!")
+        app.logger.debug("fetched!")
+        app.logger.debug("distance = %s", distance)  # Now 'distance' is defined
+        app.logger.debug("begin_date = %s", begin_date)
+        app.logger.debug("controls = %s", controls)
         return flask.jsonify(
                 result={"distance": distance, "begin_date": begin_date, "controls": controls}, 
                 status=1,
                 message="Successfully fetched all data!")
-    except:
-        app.logger.debug("Something went wrong, couldn't fetch any times/distances!")
+    except Exception as e:
+        app.logger.debug("Exception occurred: %s", str(e))
         return flask.jsonify(
                 result={}, 
                 status=0,
@@ -179,4 +198,4 @@ if app.debug:
     app.logger.setLevel(logging.DEBUG)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5005)
+    app.run(host="0.0.0.0", port=5000)
