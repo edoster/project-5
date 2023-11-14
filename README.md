@@ -1,50 +1,72 @@
 # UOCIS322 - Project 5 #
 Brevet time calculator with MongoDB!
 
+Evan Doster
+
+edoster@uoregon.edu
+ 
+ # Brevet Time Calculator
+
 ## Overview
 
-You'll add a storage to your previous project using MongoDB and `docker-compose`.
-As we discussed, `docker-compose` makes it easier to create, manage and connect multiple container to create a single service comprised of different sub-services.
+This web application calculates the open and close times for controls on a randonneuring brevet using rules defined by Randonneurs USA.
 
-Presently, there's only a placeholder directory for your Flask app, and a `docker-compose` configuration file. You will copy over `brevets/` from your completed project 4, add a MongoDB service to docker-compose and your Flask app. You will also add two buttons named `Submit` and `Display` to the webpage. `Submit` must store the information (brevet distance, start time, checkpoints and their opening and closing times) in the database (overwriting existing ones). `Display` will fetch the information from the database and fill in the form with them.
+Randonneuring is a long-distance cycling event where riders complete courses of 200km or more. Brevets are not races, but rather tests of endurance with time limits that riders must finish within.
 
-Recommended: Review [MongoDB README](MONGODB.md) and[Docker Compose README](COMPOSE.md).
+This app allows organizers to calculate the control open and close times for their events.
 
-## Tasks
+## Brevet Control Time Calculations
 
-1. Add two buttons `Submit` and `Display` in the ACP calculator page.
+The app implements the control time calculations as defined by RUSA here: https://rusa.org/pages/rulesForRiders
 
-	- Upon clicking the `Submit` button, the control times should be inserted into a MongoDB database, and the form should be cleared (reset) **without** refreshing the page.
+The key points:
 
-	- Upon clicking the `Display` button, the entries from the database should be filled into the existing page.
+- Each control has an opening and closing time. Riders must pass during this window to get credit.
 
-	- Handle error cases appropriately. For example, Submit should return an error if no control times are input. One can imagine many such cases: you'll come up with as many cases as possible.
+- The opening time is based on the maximum speed and the distance to the control from the start.
 
-2. An automated `nose` test suite with at least 2 test cases: at least one for for DB insertion and one for retrieval.
+- The closing time is based on the minimum speed and distance to the next control.
 
-3. Update README.md with brevet control time calculation rules (you were supposed to do this for Project 4), and additional information regarding this project.
-	- This project will be peer-reviewed, so be thorough.
+- The first control's opening time is based on 15km/hr. Subsequent openings are based on 15km/hr + 5km/hr for each controle.
 
-## Grading Rubric
+- Closing times are based on speeds in this table, using the speed for the next control's distance:
 
-* If your code works as expected: 100 points. This includes:
-	* Front-end implementation (`Submit` and `Display`).
-	
-	* Back-end implementation (Connecting to MongoDB, insertion and selection).
-	
-	* AJAX interaction between the frontend and backend (AJAX for `Submit` and `Display`).
-	
-	* Updating `README` with a clear specification (including details from Project 4).
-	
-	* Handling errors correctly.
-	
-	* Writing at least 2 correct tests using nose (put them in `tests`, follow Project 3 if necessary), and all should pass.
+| Distance | Minimum Speed |
+|----------|---------------|
+| 200KM    | 15km/hr       |   
+| 400KM    | 15km/hr       |
+| 600KM    | 15km/hr       |
+| 1000KM   | 11.428km/hr   |
 
-* If DB operations do not work as expected (either submit fails to store information, or display fails to retrieve and show information correctly), 60 points will be docked.
+- The final closing time is 13.5 hours after the start for a 200KM brevet.
 
-* If database-related tests are not found in `brevets/tests/`, or are incomplete, or do not pass, 20 points will be docked.
+- No controle can exceed the max distance or min speed according to this table:
 
-* If docker does not build/run correctly, or the yaml file is not updated correctly, 5 will be assigned assuming README is updated.
+| Distance | Max Distance | Min Speed |
+|----------|--------------|-----------|
+| 200KM    | 20%          | 15km/hr   |
+| 300KM    | 20%          | 15km/hr   |   
+| 400KM    | 20%          | 15km/hr   |
+| 600KM    | 25%          | 15km/hr   |
+| 1000KM   | 25%          | 11.428km/hr |
+
+The app implements these rules to dynamically calculate open and close times as the brevet distance, start time, and controle locations are adjusted.
+
+## Usage
+
+The web interface allows the brevet organizer to enter the brevet distance, start time, and checkpoint locations. As checkpoint distances are entered, the app will automatically calculate and populate the open and close time for each one.
+
+The app provides a Submit button to save these calculated times to a database for later retrieval.
+
+The Display button will fetch the latest saved brevet info and populate the form.
+
+This allows organizers to save and restore the controle times for their events.
+
+The backend uses MongoDB to store the brevet data. Docker Compose is used to run the Flask app and MongoDB containers to run the application.
+
+Automated tests validate the controle time calculations.
+
+
 
 ## Authors
 
