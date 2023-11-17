@@ -36,7 +36,7 @@ There are two ways to run the program.
 Inside of your terminal, navigate to your project-5 folder, then run 'docker compose up'. Once the container is running you can run the application by searching http://localhost:XXXX on your browser where XXXX is the port number specified in your docker-compose.yml file.
 
 #### Python 
-Inside your code editor, navigate to the folder called "brevets", then run flask_brevets.py. You can run the program on a browser by typing in http://localhost:XXXX where XXXX is the port number you have indicated in your credentials file. 
+Inside your code editor, navigate to the folder called "brevets", then run flask_brevets.py. You can run the program on a browser by typing in http://localhost:XXXX. 
 
 ## Usage
 
