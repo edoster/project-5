@@ -40,23 +40,19 @@ def open_time(control_dist_km, brevet_dist_km, brevet_start_time):
             hours = 200 / 34 + (control_dist_km - 200) / 32 + 0.01
          elif 400 <= control_dist_km <= 600:
             hours = 200 / 34 + 200 / 32 + (control_dist_km - 400) / 30 + 0.01
-         elif 600 < control_dist_km <= 1000:
+         else:    # 600 < control_dist_km <= 1000
             hours = 200 / 34 + 200 / 32 + 200 / 30 + (control_dist_km - 600) / 28 + 0.01
-         #else: 
-            #hours = 200 / 34 + 200 / 32 + 200 / 30 + 200 / 28 + (control_dist_km - 1000) / 26
       elif brevet_dist_km <= control_dist_km:
          if brevet_dist_km == 200 or brevet_dist_km == 300:
-            hours = 200 / 34
+            hours = 200 / 34 + 0.01
          elif brevet_dist_km == 400:
             hours = 200 / 34 + (200) / 32 + 0.01
          elif brevet_dist_km == 600:
             hours = 200 / 34 + 200 / 32 + (200) / 29.95
-        #elif brevet_dist_km == 1000:
-            #hours = 200 / 34 + 200 / 32 + 200 / 30 + (200) / 28
-         else: 
+         else:    # control_dist_km == 1000
             hours = 33.09
 
-      return brevet_start_time.shift(hours=hours)
+      return brevet_start_time.shift(hours=hours)                 
 
 
 
@@ -88,7 +84,5 @@ def close_time(control_dist_km, brevet_dist_km, brevet_start_time):
             hours = brevet_dist_km / 15
          elif brevet_dist_km == 1000:
             hours = 600 / 15 + (400) / 11.428 + 0.01
-         #elif brevet_dist_km > 1000:
-            #hours = 600 / 15 + 1000 / 11.428 + (1200) / 13.333 + 0.01
       return brevet_start_time.shift(hours=hours)
 

@@ -8,12 +8,11 @@ import flask
 from flask import request
 import arrow  # Replacement for datetime, based on moment.js
 import acp_times  # Brevet time calculations
-import config
-import os 
+import os
+#import config
 from pymongo import MongoClient
 
 # Set up MongoDB connection
-#client = MongoClient("mongodb://localhost:27017/")
 client = MongoClient('mongodb://' + os.environ['MONGODB_HOSTNAME'], 27017)
 
 import logging
@@ -22,7 +21,7 @@ import logging
 # Globals
 ###
 app = flask.Flask(__name__)
-CONFIG = config.configuration()
+#CONFIG = config.configuration()
 
 # Set up Flask app#
 app.debug = True
@@ -74,8 +73,6 @@ def _calc_times():
     brevet_dist = request.args.get('distance')
     brevet_dist = float(brevet_dist)
     app.logger.debug(brevet_dist)
-    #control_dist = request.form['control_dist']
-    #app.logger.debug(print("control_dist="), control_dist)
     
     start_time_str = request.args.get('begin_date')
     start_time = arrow.get(start_time_str)
@@ -161,9 +158,6 @@ def insert_times(distance, begin_date, controls):
         "distance": distance,
         "begin_date": begin_date,
         "controls": controls})
-    
-    # Log the output
-    app.logger.debug("output = ", output)
 
     # Get the unique ID assigned to the inserted document
     _id = output.inserted_id
@@ -220,10 +214,10 @@ def fetch():
 
 #############
 
-app.debug = CONFIG.DEBUG
+#app.debug = CONFIG.DEBUG
 if app.debug:
     app.logger.setLevel(logging.DEBUG)
 
 if __name__ == "__main__":
     #print("Opening for global access on port {}".format(CONFIG.PORT))
-    app.run(host="0.0.0.0", port=5000)
+    app.run(port=5000, host="0.0.0.0")

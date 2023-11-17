@@ -7,33 +7,36 @@ edoster@uoregon.edu
  
  # Brevet Time Calculator
 
-## Overview
+## Outline of the Application
 
-This web application calculates the open and close times for controls on a randonneuring brevet using rules defined by Randonneurs USA.
+You will reimplement RUSA ACP controle time calculator with Flask and AJAX.
+The calculations should populate the open and close time after pressing enter without refreshes!
+Inside of the applciation, there should be rigourous nose tests that outline potential weaknesses in the algorithm. 
 
-Randonneuring is a long-distance cycling event where riders complete courses of 200km or more. Brevets are not races, but rather tests of endurance with time limits that riders must finish within.
+### ACP controle Algorithm
 
-This app allows organizers to calculate the control open and close times for their events.
+This project consists of a web application that is based on RUSA's online calculator. The algorithm for calculating controle times is described here [https://rusa.org/pages/acp-brevet-control-times-calculator](https://rusa.org/pages/acp-brevet-control-times-calculator). Additional background information is given here [https://rusa.org/pages/rulesForRiders](https://rusa.org/pages/rulesForRiders). The description is ambiguous, but the examples help. Part of finishing this project is clarifying anything that is not clear about the requirements, and documenting it clearly. 
 
-## Brevet Control Time Calculations
+We are essentially replacing the calculator here [https://rusa.org/octime_acp.html](https://rusa.org/octime_acp.html). We can also use that calculator to clarify requirements and develop test data. 
 
-The app implements the control time calculations as defined by RUSA here: https://rusa.org/pages/rulesForRiders
+### Outline of Algorithm
 
-The key points:
+Depending on the control location, we can expect the minimum and maximum speed (km/hour) to change as a result of this distance. Refer to the table here [https://rusa.org/pages/acp-brevet-control-times-calculator](https://rusa.org/pages/acp-brevet-control-times-calculator).
 
-- Each control has an opening and closing time. Riders must pass during this window to get credit.
+The open time is calculate by dividing control distance by the maximum speed. The algorithm can be generalized as (control distance - (previous interval)) / (current maximum speed) + (last intervals control distance - previous interval) / (last intervals maximum speed) + ...
 
-- The opening time is based on the maximum speed and the distance to the control from the start.
+Similarly the close time is calculated by dividing control distance by the minimum speed. The algorithm can be generalized as (control distance - (previous interval)) / (current minimum speed) + (last intervals control distance - previous interval) / (last intervals minimum speed) + ... Except for when control distance is equal to brevet distance which both are equal to 200. This special rule dictates that our close time is 13H30. 
 
-- The closing time is based on the minimum speed and distance to the next control.
+## Running the Program
 
-- The first control's opening time is based on 15km/hr. Subsequent openings are based on 15km/hr + 5km/hr for each controle.
+There are two ways to run the program. 
 
-- Closing times are based on speeds in this table, using the speed for the next control's distance:
+#### Docker 
 
-- The final closing time is 13.5 hours after the start for a 200KM brevet.
+Inside of your terminal, navigate to your project-5 folder, then run 'docker compose up'. Once the container is running you can run the application by searching http://localhost:XXXX on your browser where XXXX is the port number specified in your docker-compose.yml file.
 
-The app implements these rules to dynamically calculate open and close times as the brevet distance, start time, and controle locations are adjusted.
+#### Python 
+Inside your code editor, navigate to the folder called "brevets", then run flask_brevets.py. You can run the program on a browser by typing in http://localhost:XXXX where XXXX is the port number you have indicated in your credentials file. 
 
 ## Usage
 
@@ -47,7 +50,9 @@ This allows organizers to save and restore the controle times for their events.
 
 The backend uses MongoDB to store the brevet data. Docker Compose is used to run the Flask app and MongoDB containers to run the application.
 
-Automated tests validate the controle time calculations.
+## Tests
+
+In order to run the tests, start the container then run 'docker exec -it <container id> \bin\bash' then navigate to the tests folder and run the command 'nosetests'. If successful,  
 
 
 

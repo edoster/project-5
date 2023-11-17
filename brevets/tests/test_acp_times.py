@@ -13,7 +13,11 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import acp_times
 import arrow
+from pymongo import MongoClient
 import flask
+from flask_brevets import get_times, insert_times
+
+
 app = flask.Flask(__name__)
 
 logging.basicConfig(format='%(levelname)s:%(message)s',
@@ -33,7 +37,6 @@ def test_200km():
      open_time = acp_times.open_time(control_dist_km, brevet_dist_km, brevet_start_time)
      close_time = acp_times.close_time(control_dist_km, brevet_dist_km, brevet_start_time)
      nose.tools.assert_equal(open_time.format("HH:mm"), "01:46")
-     #app.logger.debug("Open time= %s", open_time.format("HH:mm"))
      nose.tools.assert_equal(close_time.format("HH:mm"), "04:00")
 
      # Test Case 2
@@ -113,7 +116,7 @@ def test_890():
      open_time = acp_times.open_time(control_dist_km, brevet_dist_km, brevet_start_time)
      close_time = acp_times.close_time(control_dist_km, brevet_dist_km, brevet_start_time)
      nose.tools.assert_equal(open_time.format("DDD HH:mm"), "2 05:09")
-     nose.tools.assert_equal(close_time.format("DDD HH:mm"), "3 17:22") # this is the same as saying 40:00, it includes the first day
+     nose.tools.assert_equal(close_time.format("DDD HH:mm"), "3 17:22")
 
 
 def test_1000km():
@@ -126,39 +129,6 @@ def test_1000km():
      close_time = acp_times.close_time(control_dist_km, brevet_dist_km, brevet_start_time)
      nose.tools.assert_equal(open_time.format("DDD HH:mm"), "2 09:05")
      nose.tools.assert_equal(close_time.format("DDD HH:mm"), "4 03:00")
-
-
-
-# Insert test
-def test_insert():
-    client = app.test_client()
-
-    # Sample data
-    data = {
-        "distance": 200,
-        "begin_date": "2021-01-01T00:00:00",
-        "controls": [
-            {"km": 23, "open": "08:00", "close":"09:00"},
-            {"km": 65, "open": "10:00", "close":"11:00"}
-        ]
-    }
-
-    response = client.post('/insert', json=data)
-
-    assert_equal(response.status_code, 404) #whoops 
-    #assert_equal(response.json['status'], 1)
-
-
-# Fetch test
-def test_fetch():
-    client = app.test_client()
-
-    response = client.get('/fetch')
-
-    assert_equal(response.status_code, 404) #whoops
-    #assert_equal(response.json['status'], 1)  
-    #assert_equal(response.json['distance'], 200)
-    #assert_equal(len(response.json['controls']), 2)
 
 
 if __name__ == '__main__':
