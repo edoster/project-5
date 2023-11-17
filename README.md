@@ -53,6 +53,7 @@ The backend uses MongoDB to store the brevet data. Docker Compose is used to run
 ## Tests
 
 In order to run the tests, start the container then run 'docker exec -it <container id> \bin\bash' then navigate to the tests folder and run the command 'nosetests'. If successful, you should see something similar to this:
+
 ........
 
 ----------------------------------------------------------------------
